@@ -209,6 +209,9 @@ describe("GenericFunctions - Umfassende Tests", () => {
         response: {
           statusCode: 429,
           headers: {},
+          body: {
+            message: "Too many requests",
+          },
         },
       };
 
@@ -224,7 +227,7 @@ describe("GenericFunctions - Umfassende Tests", () => {
       // Act & Assert
       await expect(
         lexwareApiRequest.call(mockExecuteFunctions, "GET", "/v1/test")
-      ).rejects.toThrow("too many requests");
+      ).rejects.toThrow("Rate limit exceeded");
 
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledTimes(6); // 1 + 5 Retries
     });

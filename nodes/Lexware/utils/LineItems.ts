@@ -12,7 +12,20 @@ export function parseLineItemsFromCollection(
 
     if (unitPriceValue) {
       const currency = unitPriceValue.currency || "EUR";
-      const taxRatePercentage = Number(unitPriceValue.taxRatePercentage) || 19;
+      
+      // Determine taxRatePercentage - preserve undefined if explicitly set
+      let taxRatePercentage: number | undefined;
+      if (unitPriceValue.taxRatePercentage !== undefined) {
+        // If explicitly set (even to null or 0), use it
+        taxRatePercentage = unitPriceValue.taxRatePercentage === null 
+          ? 19 
+          : Number(unitPriceValue.taxRatePercentage) || 19;
+      } else {
+        // Only set default if not in unitPriceValue at all, and we have priceType/priceAmount
+        taxRatePercentage = (unitPriceValue.priceType && unitPriceValue.priceAmount !== undefined) 
+          ? 19 
+          : unitPriceValue.taxRatePercentage; // Keep undefined
+      }
 
       // Check if we have the new price structure with priceType and priceAmount
       if (
@@ -27,13 +40,13 @@ export function parseLineItemsFromCollection(
           unitPrice = {
             currency,
             netAmount: Math.round(priceAmount * 100) / 100,
-            taxRatePercentage,
+            taxRatePercentage: taxRatePercentage !== undefined ? taxRatePercentage : 19,
           };
         } else {
           unitPrice = {
             currency,
             grossAmount: Math.round(priceAmount * 100) / 100,
-            taxRatePercentage,
+            taxRatePercentage: taxRatePercentage !== undefined ? taxRatePercentage : 19,
           };
         }
       } else {
@@ -56,6 +69,11 @@ export function parseLineItemsFromCollection(
       unitPrice,
       discountPercentage: it?.discountPercentage,
     };
+
+    // Add lineItemAmount if present
+    if (it?.lineItemAmount !== undefined) {
+      lineItem.lineItemAmount = it.lineItemAmount;
+    }
 
     // Add optional fields only if they are set
     if (it?.alternative !== undefined) {

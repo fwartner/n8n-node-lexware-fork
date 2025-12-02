@@ -436,6 +436,8 @@ describe("Articles.execute - Umfassende Tests", () => {
         if (param === "title") return null;
         if (param === "netPrice") return undefined;
         if (param === "taxRate") return 19;
+        if (param === "type") return "PRODUCT"; // Required field must have valid value
+        if (param === "leadingPrice") return "NET"; // Required field must have valid value
         return "";
       });
 
@@ -448,6 +450,7 @@ describe("Articles.execute - Umfassende Tests", () => {
         "/v1/articles",
         expect.objectContaining({
           title: "",
+          type: "PRODUCT",
           price: expect.objectContaining({
             netPrice: 0,
             taxRate: 19,
