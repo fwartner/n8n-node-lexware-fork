@@ -9,6 +9,9 @@ jest.mock("../../nodes/Lexware/GenericFunctions", () => ({
   lexwareApiRequestAllItems: jest.fn(),
 }));
 
+// Test constants
+const TEST_ARTICLE_UUID = "a1b2c3d4-1234-5678-9abc-123456789012";
+
 describe("Articles.execute - Umfassende Tests", () => {
   let mockExecuteFunctions: jest.Mocked<IExecuteFunctions>;
   const mockGenericFunctions = jest.requireMock("../../nodes/Lexware/GenericFunctions") as any;
@@ -55,7 +58,7 @@ describe("Articles.execute - Umfassende Tests", () => {
         .mockReturnValueOnce("NET") // leadingPrice
         .mockReturnValueOnce(19); // taxRate
 
-      const mockResponse = { id: "art-123", ...expectedArticle };
+      const mockResponse = { id: TEST_ARTICLE_UUID, ...expectedArticle };
       lexwareApiRequest.mockResolvedValue(mockResponse);
 
       // Act
@@ -72,26 +75,22 @@ describe("Articles.execute - Umfassende Tests", () => {
 
     it("sollte einen Artikel mit minimalen Daten erstellen", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter
-        .mockReturnValue(""); // Alle Parameter leer/default
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "type") return "PRODUCT"; // Required field
+        if (param === "leadingPrice") return "NET"; // Required field
+        if (param === "taxRate") return 19;
+        return ""; // All other parameters empty/default
+      });
 
       const expectedArticle = {
-        title: "",
-        description: "",
         type: "PRODUCT",
-        articleNumber: "",
-        gtin: "",
-        note: "",
-        unitName: "",
         price: {
-          netPrice: 0,
-          grossPrice: 0,
           leadingPrice: "NET",
           taxRate: 19,
         },
       };
 
-      lexwareApiRequest.mockResolvedValue({ id: "art-124" });
+      lexwareApiRequest.mockResolvedValue({ id: TEST_ARTICLE_UUID });
 
       // Act
       const result = await executeArticles.call(mockExecuteFunctions, 0, "create");
@@ -105,17 +104,18 @@ describe("Articles.execute - Umfassende Tests", () => {
     });
 
     it("sollte verschiedene Artikel-Typen unterstützen", async () => {
-      const testCases = ["PRODUCT", "SERVICE", "ARTICLE"];
+      const testCases = ["PRODUCT", "SERVICE"];
       
       for (const type of testCases) {
         jest.clearAllMocks();
         mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
           if (param === "type") return type;
+          if (param === "leadingPrice") return "NET"; // Required field
           if (param === "taxRate") return 19;
           return "";
         });
 
-        lexwareApiRequest.mockResolvedValue({ id: `art-${type}` });
+        lexwareApiRequest.mockResolvedValue({ id: `${TEST_ARTICLE_UUID}` });
 
         const result = await executeArticles.call(mockExecuteFunctions, 0, "create");
 
@@ -131,9 +131,9 @@ describe("Articles.execute - Umfassende Tests", () => {
   describe("GET Operation", () => {
     it("sollte einen spezifischen Artikel abrufen", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       const mockResponse = {
-        id: "art-123",
+        id: TEST_ARTICLE_UUID,
         title: "Test Artikel",
         type: "PRODUCT",
       };
@@ -145,21 +145,20 @@ describe("Articles.execute - Umfassende Tests", () => {
       // Assert
       expect(lexwareApiRequest).toHaveBeenCalledWith(
         "GET",
-        "/v1/articles/art-123"
+        `/v1/articles/${TEST_ARTICLE_UUID}`
       );
       expect(result).toEqual([{ json: mockResponse }]);
     });
 
-    it("sollte mit leerer articleId umgehen", async () => {
+    it("sollte mit leerer articleId einen Fehler werfen", async () => {
       // Arrange
       mockExecuteFunctions.getNodeParameter.mockReturnValue("");
       lexwareApiRequest.mockResolvedValue({});
 
-      // Act
-      const result = await executeArticles.call(mockExecuteFunctions, 0, "get");
-
-      // Assert
-      expect(lexwareApiRequest).toHaveBeenCalledWith("GET", "/v1/articles/");
+      // Act & Assert
+      await expect(
+        executeArticles.call(mockExecuteFunctions, 0, "get")
+      ).rejects.toThrow("is required and cannot be empty");
     });
   });
 
@@ -235,23 +234,20 @@ describe("Articles.execute - Umfassende Tests", () => {
   describe("UPDATE Operation", () => {
     it("sollte einen Artikel aktualisieren", async () => {
       // Arrange
-      const articleId = "art-123";
-      mockExecuteFunctions.getNodeParameter
-        .mockReturnValueOnce(articleId) // articleId
-        .mockReturnValueOnce("Aktualisierter Titel") // title
-        .mockReturnValue(""); // andere Parameter
+      const articleId = TEST_ARTICLE_UUID;
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string, i: number) => {
+        if (param === "articleId") return articleId;
+        if (param === "title") return "Aktualisierter Titel";
+        if (param === "type") return "PRODUCT"; // Required field
+        if (param === "leadingPrice") return "NET"; // Required field
+        if (param === "taxRate") return 19;
+        return ""; // andere Parameter
+      });
 
       const expectedUpdateData = {
         title: "Aktualisierter Titel",
-        description: "",
         type: "PRODUCT",
-        articleNumber: "",
-        gtin: "",
-        note: "",
-        unitName: "",
         price: {
-          netPrice: 0,
-          grossPrice: 0,
           leadingPrice: "NET",
           taxRate: 19,
         },
@@ -265,46 +261,37 @@ describe("Articles.execute - Umfassende Tests", () => {
       // Assert
       expect(lexwareApiRequest).toHaveBeenCalledWith(
         "PUT",
-        "/v1/article/art-123",
+        `/v1/article/${TEST_ARTICLE_UUID}`,
         expectedUpdateData
       );
       expect(result).toEqual([{ json: { id: articleId } }]);
     });
 
-    it("sollte auch negative Preise akzeptieren", async () => {
+    it("sollte negative Preise ablehnen", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter
-        .mockReturnValueOnce("art-123") // articleId
-        .mockImplementation((param: string) => {
-          if (param === "netPrice") return -50;
-          if (param === "grossPrice") return -59.5;
-          if (param === "taxRate") return 19;
-          return "";
-        });
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "articleId") return TEST_ARTICLE_UUID;
+        if (param === "type") return "PRODUCT"; // Required field
+        if (param === "leadingPrice") return "NET"; // Required field
+        if (param === "netPrice") return -50;
+        if (param === "grossPrice") return -59.5;
+        if (param === "taxRate") return 19;
+        return "";
+      });
 
-      lexwareApiRequest.mockResolvedValue({ id: "art-123" });
+      lexwareApiRequest.mockResolvedValue({ id: TEST_ARTICLE_UUID });
 
-      // Act
-      await executeArticles.call(mockExecuteFunctions, 0, "update");
-
-      // Assert
-      expect(lexwareApiRequest).toHaveBeenCalledWith(
-        "PUT",
-        "/v1/article/art-123",
-        expect.objectContaining({
-          price: expect.objectContaining({
-            netPrice: -50,
-            grossPrice: -59.5,
-          }),
-        })
-      );
+      // Act & Assert - Should throw error for negative price
+      await expect(
+        executeArticles.call(mockExecuteFunctions, 0, "update")
+      ).rejects.toThrow("must be at least 0");
     });
   });
 
   describe("DELETE Operation", () => {
     it("sollte einen Artikel löschen", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       lexwareApiRequest.mockResolvedValue({ success: true });
 
       // Act
@@ -313,7 +300,7 @@ describe("Articles.execute - Umfassende Tests", () => {
       // Assert
       expect(lexwareApiRequest).toHaveBeenCalledWith(
         "DELETE",
-        "/v1/articles/art-123"
+        `/v1/articles/${TEST_ARTICLE_UUID}`
       );
       expect(result).toEqual([{ json: { success: true } }]);
     });
@@ -329,7 +316,7 @@ describe("Articles.execute - Umfassende Tests", () => {
 
     it("sollte API-Fehler weiterleiten", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       lexwareApiRequest.mockRejectedValue(new Error("API Error"));
 
       // Act & Assert
@@ -342,7 +329,7 @@ describe("Articles.execute - Umfassende Tests", () => {
   describe("Response Handling", () => {
     it("sollte Array-Antworten korrekt verarbeiten", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       const mockResponse = [
         { id: "art-1", title: "Artikel 1" },
         { id: "art-2", title: "Artikel 2" },
@@ -361,7 +348,7 @@ describe("Articles.execute - Umfassende Tests", () => {
 
     it("sollte Objekt-Antworten korrekt verarbeiten", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       const mockResponse = { id: "art-123", title: "Einzelner Artikel" };
       lexwareApiRequest.mockResolvedValue(mockResponse);
 
@@ -374,7 +361,7 @@ describe("Articles.execute - Umfassende Tests", () => {
 
     it("sollte leere Antworten verarbeiten", async () => {
       // Arrange
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("art-123");
+      mockExecuteFunctions.getNodeParameter.mockReturnValue(TEST_ARTICLE_UUID);
       lexwareApiRequest.mockResolvedValue(null);
 
       // Act
@@ -449,10 +436,9 @@ describe("Articles.execute - Umfassende Tests", () => {
         "POST",
         "/v1/articles",
         expect.objectContaining({
-          title: "",
           type: "PRODUCT",
           price: expect.objectContaining({
-            netPrice: 0,
+            leadingPrice: "NET",
             taxRate: 19,
           }),
         })
@@ -464,7 +450,13 @@ describe("Articles.execute - Umfassende Tests", () => {
     it("sollte bei vielen Parametern effizient arbeiten", async () => {
       // Arrange
       const startTime = Date.now();
-      mockExecuteFunctions.getNodeParameter.mockReturnValue("test");
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "type") return "PRODUCT";
+        if (param === "leadingPrice") return "NET";
+        if (param === "taxRate") return 19;
+        if (param === "netPrice" || param === "grossPrice") return 100;
+        return "test";
+      });
       lexwareApiRequest.mockResolvedValue({ id: "perf-test" });
 
       // Act
