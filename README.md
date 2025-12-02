@@ -20,25 +20,58 @@ npm install n8n-nodes-lexware
 
 ## ✨ Features
 
-### 🆕 **What's New in v1.1.0**
+### 🆕 **What's New in v1.2.0**
 
+#### New Endpoints (9 New Resources!)
+- **Credit Notes**: Complete credit note management with pursue and PDF generation
+- **Delivery Notes**: Delivery note creation and document handling
+- **Down Payment Invoices**: Access to down payment invoice data
+- **Event Subscriptions**: Real-time webhook notifications for all document types
+- **Payments**: Payment tracking and status information
+- **Payment Conditions**: Access to pre-configured payment terms
+- **Posting Categories**: Accounting category management
+- **Profile**: Organization and user profile information
+- **Recurring Templates**: Access to recurring invoice templates
+
+#### API Updates
+- **Updated Base URL**: Now using `https://api.lexware.io` (updated from lexoffice branding)
+- **Enhanced Rate Limiting**: Improved handling of API rate limits (2 requests/second)
+- **Expanded Type Definitions**: Complete TypeScript types for all new endpoints
+- **Better Error Messages**: More detailed API error information
+
+#### Previous Updates (v1.1.0)
 - **Quotations Expiry Date**: Set validity periods for your quotes
 - **Manual Address Support**: Full address handling alternative to contactId
 - **Simplified Total Price**: Only currency required - automatic calculations
-- **Enhanced API Compliance**: Perfect alignment with Lexware API specifications
 
 ### 🏢 **Complete Lexware API Coverage**
 
+#### Sales & Documents
 - **Articles**: Full CRUD operations with type filtering and pricing management
 - **Contacts**: Company & person management with VAT validation and role assignment
 - **Invoices**: Invoice creation, management, and JSON-based line item support
+- **Credit Notes**: Credit note creation and management with pursue functionality
+- **Delivery Notes**: Delivery note creation and document generation
+- **Down Payment Invoices**: Read-only access to down payment invoice data
 - **Dunnings**: Dunning management with preceding voucher support and finalization
 - **Order Confirmations**: Complete order confirmation workflow
 - **Quotations**: Quote management with expiry dates, manual addresses, and flexible line item handling
-- **Voucher Lists**: Voucher list retrieval with status filtering
-- **Vouchers**: Comprehensive voucher management
+
+#### Bookkeeping & Finance
+- **Vouchers**: Comprehensive voucher management with status filtering
+- **Voucher Lists**: Voucher list retrieval with advanced filtering
+- **Payments**: Payment information and status tracking
+- **Payment Conditions**: Pre-configured payment terms and conditions
+- **Posting Categories**: Accounting category management
+
+#### Configuration & Metadata
+- **Profile**: Organization and user profile information
 - **Print Layouts**: Print layout configuration access
-- **Countries**: Country data with international support
+- **Countries**: Country data with international support and tax classifications
+- **Recurring Templates**: Access to recurring invoice templates
+- **Event Subscriptions**: Webhook subscriptions for real-time updates
+
+#### File Management
 - **Files**: File upload/download with binary data handling
 
 ### 🔧 **Technical Features**
@@ -85,8 +118,8 @@ Create a new Lexware API credential in n8n with the following information:
 
 1. **Add the Lexware node** to your n8n workflow
 2. **Configure credentials** using your Lexware API access token
-3. **Select a Resource**: Choose from Articles, Contacts, Invoices, Dunnings, Order Confirmations, Quotations, Voucher Lists, Vouchers, Print Layouts, Countries, or Files
-4. **Select an Operation**: Choose from Create, Get, Get Many, Update, Delete (depending on resource)
+3. **Select a Resource**: Choose from 20+ available resources including Articles, Contacts, Invoices, Credit Notes, Delivery Notes, Payments, Event Subscriptions, and more
+4. **Select an Operation**: Choose from Create, Get, Get All, Update, Delete, or specialized operations (depending on resource)
 5. **Configure parameters** based on your specific use case
 
 ### 💡 Pro Tips
@@ -205,23 +238,94 @@ Create a new Lexware API credential in n8n with the following information:
 - Endpoint used:
   - GET `/v1/print-layouts`
 
+### Credit Notes
+
+- Endpoints used:
+  - GET `/v1/credit-notes/{id}`
+  - GET `/v1/credit-notes?page=0&voucherStatus=open`
+  - POST `/v1/credit-notes?finalize=true`
+  - POST `/v1/credit-notes/{id}/pursue`
+  - GET `/v1/credit-notes/{id}/document`
+  - GET `/v1/credit-notes/{id}/files/{fileId}`
+
+### Delivery Notes
+
+- Endpoints used:
+  - GET `/v1/delivery-notes/{id}`
+  - GET `/v1/delivery-notes?page=0&voucherStatus=draft`
+  - POST `/v1/delivery-notes`
+  - POST `/v1/delivery-notes/{id}/pursue`
+  - GET `/v1/delivery-notes/{id}/document`
+  - GET `/v1/delivery-notes/{id}/files/{fileId}`
+
+### Down Payment Invoices
+
+- Endpoints used:
+  - GET `/v1/down-payment-invoices/{id}`
+  - GET `/v1/down-payment-invoices/{id}/files/{fileId}`
+
+### Event Subscriptions
+
+- Endpoints used:
+  - GET `/v1/event-subscriptions/{id}`
+  - GET `/v1/event-subscriptions`
+  - POST `/v1/event-subscriptions`
+  - DELETE `/v1/event-subscriptions/{id}`
+- Supported events include: invoice.created, invoice.changed, contact.created, voucher.created, and 30+ more event types
+
+### Payments
+
+- Endpoint used:
+  - GET `/v1/payments/{voucherType}/{voucherId}`
+- Supported voucher types: salesinvoice, salescreditnote, purchaseinvoice, purchasecreditnote
+
+### Payment Conditions
+
+- Endpoint used:
+  - GET `/v1/payment-conditions`
+
+### Posting Categories
+
+- Endpoint used:
+  - GET `/v1/posting-categories`
+
+### Profile
+
+- Endpoint used:
+  - GET `/v1/profile`
+
+### Recurring Templates
+
+- Endpoints used:
+  - GET `/v1/recurring-templates/{id}`
+  - GET `/v1/recurring-templates?page=0`
+
 ## 📋 API Reference
 
 ### Core Resources & Operations
 
-| Resource                | Create | Read | Update | Delete | List | Special Operations                |
-| ----------------------- | :----: | :--: | :----: | :----: | :--: | :-------------------------------- |
-| **Articles**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Type filtering                    |
-| **Contacts**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Company/Person, VAT validation    |
-| **Invoices**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Status filtering |
-| **Dunnings**            |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Finalize, Preceding voucher       |
-| **Order Confirmations** |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Pagination                        |
-| **Quotations**          |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Expiry dates, Manual addresses |
-| **Voucher Lists**       |   ❌   |  ✅  |   ❌   |   ❌   |  ✅  | Status filtering                  |
-| **Vouchers**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Status filtering                  |
-| **Print Layouts**       |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Configuration access              |
-| **Countries**           |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | International data                |
-| **Files**               |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Binary upload/download            |
+| Resource                    | Create | Read | Update | Delete | List | Special Operations                          |
+| --------------------------- | :----: | :--: | :----: | :----: | :--: | :------------------------------------------ |
+| **Articles**                |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Type filtering                              |
+| **Contacts**                |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Company/Person, VAT validation              |
+| **Countries**               |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Tax classifications                         |
+| **Credit Notes**            |   ✅   |  ✅  |   ❌   |   ❌   |  ✅  | Pursue, PDF rendering, File download        |
+| **Delivery Notes**          |   ✅   |  ✅  |   ❌   |   ❌   |  ✅  | Pursue, PDF rendering, File download        |
+| **Down Payment Invoices**   |   ❌   |  ✅  |   ❌   |   ❌   |  ❌  | File download                               |
+| **Dunnings**                |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Finalize, Preceding voucher                 |
+| **Event Subscriptions**     |   ✅   |  ✅  |   ❌   |   ✅   |  ✅  | Webhook management                          |
+| **Files**                   |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Binary upload/download                      |
+| **Invoices**                |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Status filtering           |
+| **Order Confirmations**     |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Pagination                                  |
+| **Payment Conditions**      |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Pre-configured payment terms                |
+| **Payments**                |   ❌   |  ✅  |   ❌   |   ❌   |  ❌  | Payment status tracking                     |
+| **Posting Categories**      |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Accounting categories                       |
+| **Print Layouts**           |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Configuration access                        |
+| **Profile**                 |   ❌   |  ✅  |   ❌   |   ❌   |  ❌  | Organization info                           |
+| **Quotations**              |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Expiry dates, Addresses    |
+| **Recurring Templates**     |   ❌   |  ✅  |   ❌   |   ❌   |  ✅  | Recurring invoice templates                 |
+| **Voucher Lists**           |   ❌   |  ✅  |   ❌   |   ❌   |  ✅  | Status filtering                            |
+| **Vouchers**                |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Status filtering                            |
 
 ### Advanced Features
 
