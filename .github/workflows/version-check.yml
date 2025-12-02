@@ -1,0 +1,59 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Get main branch version
+        id: main-version
+        run: |
+          git fetch origin main
+          git checkout origin/main -- package.json
+          MAIN_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$MAIN_VERSION" >> $GITHUB_OUTPUT
+          echo "Main branch version: $MAIN_VERSION"
+          git checkout HEAD -- package.json
+
+      - name: Compare versions
+        run: |
+          CURRENT="${{ steps.current-version.outputs.version }}"
+          MAIN="${{ steps.main-version.outputs.version }}"
+          
+          echo "Current PR version: $CURRENT"
+          echo "Main branch version: $MAIN"
+          
+          if [ "$CURRENT" = "$MAIN" ]; then
+            echo "⚠️ Warning: Version number has not been updated"
+            echo "Please update the version in package.json before merging"
+            exit 1
+          else
+            echo "✅ Version has been updated"
+          fi
+
+      - name: Check CHANGELOG
+        run: |
+          if grep -q "${{ steps.current-version.outputs.version }}" CHANGELOG.md; then
+            echo "✅ CHANGELOG.md has been updated with version ${{ steps.current-version.outputs.version }}"
+          else
+            echo "⚠️ Warning: CHANGELOG.md does not contain version ${{ steps.current-version.outputs.version }}"
+            echo "Please update CHANGELOG.md before merging"
+            exit 1
+          fi
+

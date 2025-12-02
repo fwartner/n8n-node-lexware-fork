@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Lexware API Documentation
+    url: https://developer.lexware.io/
+    about: Official Lexware API documentation
+  - name: 💬 n8n Community Forum
+    url: https://community.n8n.io/
+    about: Ask questions and discuss with the n8n community
+  - name: 📖 n8n Documentation
+    url: https://docs.n8n.io/
+    about: Official n8n documentation
+
