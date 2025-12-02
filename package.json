@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-lexware",
+  "name": "n8n-nodes-lexware-fork",
   "version": "1.2.5",
   "description": "N8N nodes for Lexware API integration",
   "keywords": [
@@ -11,14 +11,14 @@
     "integration"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/fwartner/n8n-node-lexware#readme",
+  "homepage": "https://github.com/fwartner/n8n-node-lexware-fork#readme",
   "author": {
-    "name": "Adrijan Bajrami",
-    "email": "adrijan.bajrami@example.com"
+    "name": "Florian Wartner",
+    "email": "florian@pixelandprocess.de"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fwartner/n8n-node-lexware.git"
+    "url": "git+https://github.com/fwartner/n8n-node-lexware-fork.git"
   },
   "main": "index.js",
   "scripts": {

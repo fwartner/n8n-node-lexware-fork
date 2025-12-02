@@ -1,7 +1,7 @@
 # n8n Lexware Integration
 
-[![npm version](https://badge.fury.io/js/n8n-nodes-lexware.svg)](https://badge.fury.io/js/n8n-nodes-lexware)
-[![npm downloads](https://img.shields.io/npm/dm/n8n-nodes-lexware.svg)](https://www.npmjs.com/package/n8n-nodes-lexware)
+[![npm version](https://badge.fury.io/js/n8n-nodes-lexware-fork.svg)](https://badge.fury.io/js/n8n-nodes-lexware-fork)
+[![npm downloads](https://img.shields.io/npm/dm/n8n-nodes-lexware-fork.svg)](https://www.npmjs.com/package/n8n-nodes-lexware-fork)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive n8n community node package for seamless Lexware API integration. This package provides modular access to all major Lexware resources with full CRUD operations, robust error handling, and extensive testing coverage.
@@ -15,8 +15,8 @@ npm install n8n-nodes-lexware
 ### 📚 Resources
 
 - **Documentation**: [Lexware API Samples](https://developers.lexware.io/assets/public/Lexware-API-Samples.postman_collection.json)
-- **npm Package**: https://www.npmjs.com/package/n8n-nodes-lexware
-- **GitHub Repository**: https://github.com/adrijanb/n8n-node-lexware
+- **npm Package**: https://www.npmjs.com/package/n8n-nodes-lexware-fork
+- **GitHub Repository**: https://github.com/fwartner/n8n-node-lexware-fork
 
 ## ✨ Features
 
@@ -59,7 +59,7 @@ npm install n8n-nodes-lexware
 Install the package directly from npm:
 
 ```bash
-npm install n8n-nodes-lexware
+npm install n8n-nodes-lexware-fork
 ```
 
 Then restart your n8n instance. The Lexware node will be available in your node palette.
@@ -67,8 +67,8 @@ Then restart your n8n instance. The Lexware node will be available in your node 
 ### For Development
 
 ```bash
-git clone https://github.com/adrijanb/n8n-node-lexware.git
-cd n8n-node-lexware
+git clone https://github.com/fwartner/n8n-node-lexware-fork.git
+cd n8n-node-lexware-fork
 npm install
 npm run build
 npm test  # Run the 230+ test suite
@@ -282,7 +282,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Support
 
-- **Issues**: [Report bugs or request features via GitHub Issues](https://github.com/adrijanb/n8n-node-lexware/issues)
+- **Issues**: [Report bugs or request features via GitHub Issues](https://github.com/fwartner/n8n-node-lexware-fork/issues)
 - **Documentation**: Check the [Lexware API Documentation](https://developers.lexware.io/)
 - **Community**: Join the n8n community for general support
 
