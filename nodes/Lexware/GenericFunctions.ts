@@ -59,6 +59,9 @@ export async function lexwareApiRequest(
   optionOverrides: Partial<IHttpRequestOptions> = {}
 ) {
   const credentials = await this.getCredentials("lexwareApi");
+  
+  // Fallback to default API URL if baseUrl is not set (for backwards compatibility)
+  const baseUrl = (credentials.baseUrl as string) || "https://api.lexware.io";
 
   const baseOptions: Partial<IHttpRequestOptions> = {
     method: method as IHttpRequestMethods,
@@ -78,7 +81,7 @@ export async function lexwareApiRequest(
 
   const url =
     (optionOverrides.url as string | undefined) ??
-    `${credentials.baseUrl}${endpoint}`;
+    `${baseUrl}${endpoint}`;
   const options: IHttpRequestOptions = {
     url,
     method: baseOptions.method,
@@ -188,9 +191,13 @@ export async function lexwareApiUpload(
   optionOverrides: Partial<IHttpRequestOptions> = {}
 ) {
   const credentials = await this.getCredentials("lexwareApi");
+  
+  // Fallback to default API URL if baseUrl is not set (for backwards compatibility)
+  const baseUrl = (credentials.baseUrl as string) || "https://api.lexware.io";
+  
   const options: IHttpRequestOptions = {
     method: "POST" as IHttpRequestMethods,
-    url: `${credentials.baseUrl}${endpoint}`,
+    url: `${baseUrl}${endpoint}`,
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${credentials.accessToken}`,
@@ -210,9 +217,13 @@ export async function lexwareApiDownload(
   optionOverrides: Partial<IHttpRequestOptions> = {}
 ) {
   const credentials = await this.getCredentials("lexwareApi");
+  
+  // Fallback to default API URL if baseUrl is not set (for backwards compatibility)
+  const baseUrl = (credentials.baseUrl as string) || "https://api.lexware.io";
+  
   const options: IHttpRequestOptions = {
     method: "GET" as IHttpRequestMethods,
-    url: `${credentials.baseUrl}${endpoint}`,
+    url: `${baseUrl}${endpoint}`,
     headers: {
       Authorization: `Bearer ${credentials.accessToken}`,
     } as JsonObject,

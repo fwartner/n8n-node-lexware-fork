@@ -15,9 +15,9 @@ export class LexwareApi implements ICredentialType {
       name: "baseUrl",
       type: "string",
       default: "https://api.lexware.io",
-      required: true,
+      required: false,
       placeholder: "https://api.lexware.io",
-      description: "Base URL of the Lexware API",
+      description: "Base URL of the Lexware API. Defaults to https://api.lexware.io if not specified.",
     },
     {
       displayName: "Access Token",
