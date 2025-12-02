@@ -11,14 +11,14 @@
     "integration"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/adrijanb/n8n-node-lexware#readme",
+  "homepage": "https://github.com/fwartner/n8n-node-lexware#readme",
   "author": {
     "name": "Adrijan Bajrami",
     "email": "adrijan.bajrami@example.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adrijanb/n8n-node-lexware.git"
+    "url": "git+https://github.com/fwartner/n8n-node-lexware.git"
   },
   "main": "index.js",
   "scripts": {
